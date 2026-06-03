@@ -1,0 +1,71 @@
+________________________________________________________________________________
+
+$John The Ripper$
+
+wget https://gitlab.com/kalilinux/packages/hash-identifier/-/raw/kali/master/hash-id.py
+
+The above is the download link for a tool for indentifying hashes 
+after downloading just 
+python3 hash-id.py to launch and paste the hash to identify its type
+
+MAIN-----------------------------------
+john --format=raw-md5 --wordlist=/usr/share/wordlists/rockyou.txt hash1.txt
+
+This is the syntax for cracking the hash of a specified hash with its hash known like here it is md5
+
+NTLM HASH CRACK--------------------------------------
+john --format=nt --wordlist=/usr/share/wordlists/rockyou.txt ntlm.txt
+
+UNSHADOWING (combining /etc/shadow and /etc/passwd) ------------------------------
+we either combine the actual files from /etc or we take a copy of it and unshadow them either
+or you can literally take lines of specific user's hash from both files and save those lines in two diff files and combine them 
+
+unshadow [path to passwd] [path to shadow] > result.txt
+unshadow local_passwd local_shadow > lol.txt
+
+UNSHADOWED HASH CRACK-------------------------------
+john --wordlist=/usr/share/wordlists/rockyou.txt --format=sha512crypt lol.txt
+
+SINGLE mode ------------------------------------
+where you know a user's name and their password hashes
+the john will play with username and keep altering it until it finds a password with combinations 
+
+Consider the username “Markus”.
+
+Some possible passwords could be:
+
+Markus1, Markus2, Markus3 (etc.)
+MArkus, MARkus, MARKus (etc.)
+Markus!, Markus$, Markus* (etc.)
+
+If you’re cracking hashes in single crack mode, you need to change the file format that you’re feeding John for it to understand what data to create a wordlist from. You do this by prepending the hash with the username that the hash belongs to, so according to the above example, we would change the file hashes.txt
+
+From 1efee03cdcb96d90ad48ccc7b8666033
+
+To mike:1efee03cdcb96d90ad48ccc7b8666033
+
+john --single --format=raw-md5 hash07.txt
+
+ZIP FILE PASSWORD CRACKING--------------------------------
+
+zip2john zipfile.zip > zip_hash.txt (converting zip to a john-understandable format)
+
+john --wordlist=/usr/share/wordlists/rockyou.txt zip_hash.txt
+
+RAR FILE PASSWORD CRACKING--------------------------------------
+
+rar2john rarfile.rar > rar_hash.txt (conversion)
+
+john --wordlist=/usr/share/wordlists/rockyou.txt lol.txt
+
+
+SSH PRIVATE KEY FILE (id_rsa) password cracking ---------------------------------
+
+ssh2john [id_rsa] > lol.txt
+or
+/opt/john/ssh2john.py [id_rsa] > lol.txt
+
+john --wordlist=/usr/share/wordlists/rockyou.txt lol.txt
+
+________________________________________________________________________________________________________
+

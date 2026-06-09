@@ -69,3 +69,90 @@ john --wordlist=/usr/share/wordlists/rockyou.txt lol.txt
 
 ________________________________________________________________________________________________________
 
+Gobuster
+
+Directory research
+gobuster dir -u http://targetip -w /usr/share/dirb/wordlists/common.txt
+
+___________________________________________________________________________________________________________
+
+NMAP Host Discovery
+
+Host discovery : (To check if a host is up before scanning ports )---
+nmap -sn <host ip>
+
+Host discovery with arp scan only (no port scan)-------------------
+nmap -PR -sn TARGETS 
+
+nmap host discovery with icmp echo request and reply 
+(ICMP type 8 and 0)---------------
+nmap -PE -sn TARGET
+
+In case majority of the hosts on the target system restrict icmp echo requests you can also use icmp timestamp request
+(ICMP Type 13 and 14)---------------------
+nmap -PP -sn TARGET
+
+Alternative for the above is to use the Address mask query 
+(ICMP Type 17 and 18) ---------------------------------------------
+nmap -PM -sn TARGET
+
+TCP SYN PING - Tries to establish a tcp connection, if a connection is established the host is up ---------------------------------------nmap -PS -sn TARGET 
+
+Sudo privileged users dont need a complete handshake as the TCP SYN ACK is enough to ensure that the host is up or not, while on the other hand the normal users complete the handshake
+
+TCP ACK PING ---------------------------------------------------
+sudo nmap -PA -sn TARGET
+(If send without sudo it will act as a TCP SYN ping resulting in a 3 way handshake)----------------------------------------------
+
+The client sends a TCP ACK PACKET and the server sends a TCP RST (Reset) packet, as the ack packet is not part of any ongoing connection so it just kinda denies it 
+Server sending the RST packet signifies it is up and listening 
+
+UDP PING ------------------------------------------------------------
+
+sudo nmap -PU -sn TARGET
+
+UDP Port open no reply (port and host both up)
+UDP Port closed ,ICMP destination unreachable reply (port closed but host is up)
+
+_____________________________________________________________________
+
+NMAP Port Scans
+
+TCP Connect Scan-----------------------------------------------------
+sudo nmap -sT TARGET
+
+used when you are a non privileged user
+(Completes a 3 way handshake and tears it down by sending a RST,ACK packet as we dont need the connection anyways)
+
+_
+TCP SYN Scan---------------------------------------------------------
+sudo nmap -sS TARGET 
+
+done when you are privileged user as it doesn't establish a full connection resulting in no logging in the network logs
+
+SYN > SYN,ACK > RST
+_
+TCP UDP Scan
+
+sudo nmap -sU TARGET
+
+_____________________________________________________________________
+
+NMAP ADVANCED PORT SCANS
+
+NULL SCAN -----------------------------------------------------------
+sudo nmap -sN TARGET
+(all flags set zero) NULL > RST,ACK
+
+FIN SCAN ------------------------------------------------------------
+sudo nmap -sF TARGET
+(only FIN flag set) FIN > RST,ACK
+
+XMAS SCAN -----------------------------------------------------------
+sudo nmap -sX TARGET
+(Sending FIN,PSH,URG) FIN,PSH,URG > RST,ACK
+
+ 
+
+
+

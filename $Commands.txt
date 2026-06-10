@@ -76,7 +76,7 @@ gobuster dir -u http://targetip -w /usr/share/dirb/wordlists/common.txt
 
 ___________________________________________________________________________________________________________
 
-NMAP Host Discovery
+NMAP Host Discovery:
 
 Host discovery : (To check if a host is up before scanning ports )---
 nmap -sn <host ip>

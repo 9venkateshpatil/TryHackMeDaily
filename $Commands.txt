@@ -151,6 +151,19 @@ sudo nmap -sF TARGET
 XMAS SCAN -----------------------------------------------------------
 sudo nmap -sX TARGET
 (Sending FIN,PSH,URG) FIN,PSH,URG > RST,ACK
+__
+
+TCP ACK SCAN
+sudo nmap -sA TARGET 
+
+_____________________________________________________________________
+
+NMAP Version detection----------------------------------------------
+
+sudo nmap -sV TARGET
+
+sudo nmap -sV --version-all TARGET (highest intensity)
+
 
  
 

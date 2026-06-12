@@ -165,7 +165,26 @@ sudo nmap -sV TARGET
 sudo nmap -sV --version-all TARGET (highest intensity)
 
 
- 
+_____________________________________________________________________
+__________________________________________________________________________________________________________________________________________
+
+CURL
+
+RESPONSE HEADER
+curl -I 10.49.149.85:3000/
+(check for terms like xpowered by, set-cookie to identify the web application stack)
+
+curl http://10.48.161.14:3000/nonexistent
+(this for again web application stack but each web stack responds in a distinct manner so search for it on google)
+(works only in mern stack)
+
+curl -H "" http********
+(custom http header)
+
+curl -v 
+(VERBOSE OUTPUT)
+
+
 
 
 

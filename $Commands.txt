@@ -184,6 +184,17 @@ curl -H "" http********
 curl -v 
 (VERBOSE OUTPUT)
 
+_
+_
+_
+
+NSLOOKUP
+
+nslookup IP ADDR|DOMAIN
+
+_
+_
+_
 
 
 

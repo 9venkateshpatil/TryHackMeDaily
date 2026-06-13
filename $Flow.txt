@@ -1,0 +1,16 @@
+https://tryhackme.com/certification/ai-security?vote=venkateshpatil
+
+Walking an application
+-viewing the page source and playing with developer tools
+
+Content discovery 
+-robots.txt, sitemap.xml, http headers, framework stack, google dorking, wappalyzer, wayback machine, s3 buckets(s3.amazonaws.com), gobuster with -x -s , gobuster dns, dir, vhost
+
+Modern Webstacks
+-Check for frameworks, do fingerprints, using curl -I or nikto -h
+
+Web Server Attacks
+-Python :What it serves, dir list, access dotfiles. extract zips,exe
+-Apache :/Server-Status(mod_status), gobuster find .bak, ,htpasswd,etc
+-Express:/api/routes, /api/debug/env, /static/config.js
+

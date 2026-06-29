@@ -1,4 +1,4 @@
-______________________________________________________________________________
+_____________________________________________________________________________
 
 $John The Ripper$
 
@@ -66,6 +66,8 @@ or
 /opt/john/ssh2john.py [id_rsa] > lol.txt
 
 john --wordlist=/usr/share/wordlists/rockyou.txt lol.txt
+
+john --format=raw-sha256 --incremental=alpha hash.txt
 
 ________________________________________________________________________________________________________
 
@@ -195,7 +197,14 @@ nslookup IP ADDR|DOMAIN
 _
 _
 _
+______________________________________________________________________
 
+hydra -l marco -P marco.txt -f -V -t 4 social.thm http-post-form '/login:username=^USER^&password=^PASS^:F=Invalid' -s 5003
 
+hydra -l macro -P pass_macro.txt 10.49.160.22 -t 4 ssh
 
+______________________________________________________________________________________________________________________________________
 
+HASHCAT
+
+hashcat -m 1400 -a 3 hash.txt ?l?l?l?l?l?l
